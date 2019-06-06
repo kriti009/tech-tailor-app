@@ -33,7 +33,7 @@ app.use(express.static(__dirname + "/public"));
 // app.use(methodOverride("_method"));
 
 
-app.get('/', (req, res) => {
+app.get('/products', (req, res) => {
     Product.find({}, (err, data) =>{
         if(err)
             console.log(err);
