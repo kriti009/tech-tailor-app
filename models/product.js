@@ -2,7 +2,7 @@ var mongoose = require("mongoose");
 
 var Schema = mongoose.Schema;
 var productSchema = new mongoose.Schema({
-    _id: Schema.Types.ObjectId,
+    
     gender : {type: String , enum : ['m' ,'f']},
     image_url : {type: String},
     service_type: {type : String},
