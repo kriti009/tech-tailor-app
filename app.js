@@ -62,7 +62,11 @@ app.get('/get_user_details', (req, res) => {
         }
     })
 });
-
+app.get("/get_category", (req, res)=> {
+    Category.find({} , (err, category) => {    
+        res.json(category);
+    })    
+})
 
 app.post('/place_order', (req, res) => {
     var newOrder = {
