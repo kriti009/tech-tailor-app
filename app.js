@@ -50,7 +50,7 @@ app.get('/products/:id', (req, res) =>{
         }
     })
 })
-app.get('get_user_details', (req, res) => {
+app.get('/get_user_details', (req, res) => {
     User.findById(req.query.user_id, (err, user) => {
         if(err){
             console.log(err);
