@@ -7,10 +7,12 @@ var express = require('express'),
 //requiring models
 var User = require('./models/user');
 var Order = require("./models/order");
+var Category = require("./models/category");
 // var Cart = require('./models/cart');
 var Product = require('./models/product');
 var seedDB = require("./seedDb");
 var seedUser = require("./seedUser");
+var seedCategory = require("./seedCategory");
 
 // mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor
 var mongoDB = 'mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor';
@@ -28,6 +30,7 @@ app.use(express.static(__dirname + "/public"));
 //seeding DB
 // seedDB();
 // seedUser();
+// seedCategory();
 
 // app.set("view engine", "ejs");
 // app.use(methodOverride("_method"));
@@ -59,6 +62,7 @@ app.get('/get_user_details', (req, res) => {
         }
     })
 });
+
 
 app.post('/place_order', (req, res) => {
     var newOrder = {

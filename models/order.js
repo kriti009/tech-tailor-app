@@ -1,6 +1,8 @@
 var mongoose = require("mongoose");
 
+var Schema = mongoose.Schema;
 var orderSchema = new mongoose.Schema({
+    _id : {type: Number},
     product_id : {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product"
