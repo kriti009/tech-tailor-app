@@ -66,7 +66,25 @@ app.get("/get_category", (req, res)=> {
     Category.find({} , (err, category) => {    
         res.json(category);
     })    
-})
+});
+app.get("/product_by_category", (req,res) => {
+    var category_name = req.query.name;
+    // console.log(req.query.name);
+    Category.findOne({"name" : category_name}, (err,category) => {
+        if(err)
+            console.log(err)
+        else{
+            // res.json(category);
+            Product.find({"gender": category.name}, (err, products) => {
+                if(err)
+                    console.log(err);
+                else{
+                    res.json(products);
+                }
+            })
+        }
+    });
+});
 
 app.post('/place_order', (req, res) => {
     var newOrder = {
