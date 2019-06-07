@@ -67,10 +67,11 @@ app.get("/get_category", (req, res)=> {
         res.json(category);
     })    
 });
-app.get("/product_by_category", (req,res) => {
-    var category_name = req.query.name;
-    // console.log(req.query.name);
-    Category.findOne({"name" : category_name}, (err,category) => {
+app.get("/product_by_category/:gender", (req,res) => {
+    // var category_name = req.query.name;
+    // console.log(req.params.gender);
+
+    Category.findOne({"name" : req.params.gender}, (err,category) => {
         if(err)
             console.log(err)
         else{
