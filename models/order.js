@@ -2,7 +2,6 @@ var mongoose = require("mongoose");
 
 var Schema = mongoose.Schema;
 var orderSchema = new mongoose.Schema({
-    _id : {type: Number},
     product_id : {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product"
@@ -19,7 +18,8 @@ var orderSchema = new mongoose.Schema({
     pickup_time: {
         type : String ,
         // required: true
-    }
-});
+    },
+    status : {type: String , enum: ['order placed','order picked-up','alteration in progress', 'order delivered']},
+},{timestamps: true});
 
 module.exports = mongoose.model("Order", orderSchema);
