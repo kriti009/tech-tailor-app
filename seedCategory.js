@@ -10,6 +10,10 @@ var data = [
     },{
         name: 'female',
         image_url: "https://cdn.pixabay.com/photo/2016/11/22/06/05/girl-1848454_960_720.jpg"
+    },{
+        name: 'kid',
+        image_url: "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80"
+    
     }
 ]
 function seedCategory(){

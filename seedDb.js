@@ -75,6 +75,14 @@ var data = [
         description: "Our most popular alteration for women, for anything from jeans to suit alterations. We request that you safety pin the trousers with a single pin in one leg to the length that you'd like them shortened to, or include a clearly marked pair that fit perfectly, to be copied. Alternatively, you can let us know in the notes (when adding to cart) how much you'd like taken off in cms or inches.",
         alteration_price : 230,
         is_available : true,
+    },{
+        gender : 'kid',
+        image_url : "https://media.istockphoto.com/photos/school-children-in-classroom-picture-id74410250",
+        service_type: 'school uniform alteration',
+        category: 'formal',
+        description: "Our most popular alteration for kids, for anything from jeans to suit alterations. We request that you safety pin the trousers with a single pin in one leg to the length that you'd like them shortened to, or include a clearly marked pair that fit perfectly, to be copied. Alternatively, you can let us know in the notes (when adding to cart) how much you'd like taken off in cms or inches.",
+        alteration_price : 500,
+        is_available : true,
     },
 ]
 function seedDB(){
