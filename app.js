@@ -19,9 +19,9 @@ var seedUser = require("./seedUser");
 var seedCategory = require("./seedCategory");
 
 // mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor
-// var mongoDB = 'mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor';
-mongoose.connect("mongodb://localhost:27017/tech-tailor",{ useNewUrlParser: true});
-// mongoose.connect(mongoDB);
+var mongoDB = 'mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor';
+// mongoose.connect("mongodb://localhost:27017/tech-tailor",{ useNewUrlParser: true});
+mongoose.connect(mongoDB);
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
@@ -32,9 +32,9 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(__dirname + "/public"));
 
 //seeding DB
-// seedDB();
+seedDB();
 // seedUser();
-// seedCategory();
+seedCategory();
 
 // app.set("view engine", "ejs");
 // app.use(methodOverride("_method"));
@@ -147,8 +147,7 @@ app.get("/get_category", (req, res)=> {
     })    
 });
 app.get("/product_by_category/:gender", (req,res) => {
-    // var category_name = req.query.name;
-    // console.log(req.params.gender);
+    
 
     Category.findOne({"name" : req.params.gender}, (err,category) => {
         if(err)
@@ -231,15 +230,7 @@ function generateNewJWT (user , device_id){
         user: user,
     };
 }
-// function decodeJwt (token) {
-//     var base64Url = token.split('.')[1];
-//     var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-//     var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-//         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-//     }).join(''));
 
-//     return JSON.parse(jsonPayload);
-// };
 
 app.listen( process.env.PORT || 8000  , () => {
     console.log("Server Connected");
