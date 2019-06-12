@@ -32,9 +32,9 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(__dirname + "/public"));
 
 //seeding DB
-seedDB();
+// seedDB();
 // seedUser();
-seedCategory();
+// seedCategory();
 
 // app.set("view engine", "ejs");
 // app.use(methodOverride("_method"));
