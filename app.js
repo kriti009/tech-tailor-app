@@ -2,8 +2,12 @@ var express = require('express'),
     app = express(),
     bodyParser = require('body-parser'),
     mongoose = require('mongoose'),
-    twilio = require('twilio');
-
+    speakeasy = require('speakeasy'),
+    otplib = require('otplib'),
+    jwt = require('jsonwebtoken'),
+    jwtDecode = require('jwt-decode');
+    
+var config = require('./config');
 //requiring models
 var User = require('./models/user');
 var Order = require("./models/order");
@@ -15,14 +19,14 @@ var seedUser = require("./seedUser");
 var seedCategory = require("./seedCategory");
 
 // mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor
-var mongoDB = 'mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor';
-// mongoose.connect("mongodb://localhost:27017/tech-tailor",{ useNewUrlParser: true});
-mongoose.connect(mongoDB);
+// var mongoDB = 'mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor';
+mongoose.connect("mongodb://localhost:27017/tech-tailor",{ useNewUrlParser: true});
+// mongoose.connect(mongoDB);
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-
+app.set('superSecret', config.secret);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(__dirname + "/public"));
@@ -36,6 +40,88 @@ app.use(express.static(__dirname + "/public"));
 // app.use(methodOverride("_method"));
 
 
+// var secret = otplib.authenticator.generateSecret();
+var otp_secret = "N4YGKYRTNFFGMTZYLB4U2L3OJZGFQYLV";
+
+app.get('/generate_otp/:no', (req,res)=>{
+    var phone_no = req.params.no;
+    const token = otplib.authenticator.generate(otp_secret);
+    res.json({success: true, otp_secret: otp_secret, token: token});
+});
+app.post('/signup/verify_otp', (req,res)=>{    
+    var user_token = req.query.token;
+    var device_id = req.query.device_id;
+    var new_user = {
+        name: req.query.name,
+        password: req.query.password,
+        email: req.query.email,
+        phone_no: req.query.phone_no,
+        role: 'customer',
+        address: req.query.address,
+    };
+    if(otplib.authenticator.check(user_token, otp_secret)){
+        // res.json({success: true, message: "OTP matched!"});
+        User.create(new_user).then((user)=>{
+            // const payload = {
+            //     name: user.name,
+            //     device_id: device_id,
+            // };
+            // var token = jwt.sign(payload, app.get('superSecret'), {
+            //     expiresIn: '24h' //  
+            // });
+            // user.jwtToken.push(token);
+            // user.save();
+            // //return the info including token as json
+            // res.json({
+            //     success: true,
+            //     message: 'token generated',
+            //     user: user,
+            // });
+            res.send(generateNewJWT(user, device_id));
+        })
+    }
+    else
+        res.json({success: false, message: "authentication failed."});
+});
+app.post('/login/verify_otp', (req, res)=>{
+    var user_token = req.query.token;
+    var device_id = req.query.device_id;
+    var phone_no = req.query.phone_no;
+    // var user_id = req.query.user_id;
+    // console.log(phone_no);
+    if(otplib.authenticator.check(user_token, otp_secret)){
+        User.findOne({'phone_no': phone_no}, (err, user) => {
+            if(err){
+                console.log(err);
+            }else{
+                var decoded = [];
+                user.jwtToken.forEach((t)=>{
+                    if(jwtDecode(t).device_id == device_id)
+                        res.json({success: true, message: "welcome back "+ jwtDecode(t).name});
+                });
+                //generate new token with encoded device id and push it into jwtToken param in User
+                res.send(generateNewJWT(user, device_id));
+            }
+        })
+        
+    }else{
+        res.json({success: false, message: "authentication failed."});
+    }
+    
+})
+app.post('/signup', (req,res)=>{
+    var phone_no = req.query.phone_no;
+    res.redirect('/generate_otp/'+phone_no);
+});
+app.post('/login', (req, res)=>{
+    var phone_no = req.query.phone_no;
+    User.findOne({'phone_no': phone_no}).then((user)=>{
+        res.redirect("/generate_otp/"+phone_no);
+    }).catch((e) => {
+        res.status(404).json({success: false, message: "User does no exixts"});
+    })
+    
+});
 app.get('/products', (req, res) => {
     Product.find({}).then((data) => {
         res.status(200).json(data);
@@ -127,6 +213,33 @@ app.put('/update_status', (req, res)=>{
         res.status(202).send(result);
     });
 });
+
+function generateNewJWT (user , device_id){
+    const payload = {
+        name: user.name,
+        device_id: device_id,
+    };
+    var token = jwt.sign(payload, app.get('superSecret'), {
+        expiresIn: '24h' //  
+    });
+    user.jwtToken.push(token);
+    user.save();
+    //return the info including token as json
+     return {
+        success: true,
+        message: 'token generated',
+        user: user,
+    };
+}
+// function decodeJwt (token) {
+//     var base64Url = token.split('.')[1];
+//     var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+//     var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+//         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+//     }).join(''));
+
+//     return JSON.parse(jsonPayload);
+// };
 
 app.listen( process.env.PORT || 8000  , () => {
     console.log("Server Connected");
