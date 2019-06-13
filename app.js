@@ -115,7 +115,10 @@ app.post('/signup', (req,res)=>{
 });
 app.post('/login', (req, res)=>{
     var phone_no = req.query.phone_no;
+    // console.log(phone_no);
     User.findOne({'phone_no': phone_no}).then((user)=>{
+        if(user==null)
+            res.status(404).json({success: false, message: "User does no exixts"});
         res.redirect("/generate_otp/"+phone_no);
     }).catch((e) => {
         res.status(404).json({success: false, message: "User does no exixts"});
