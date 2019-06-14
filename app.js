@@ -27,7 +27,7 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 app.set('superSecret', config.secret);
-app.use(bodyParser.json());t sta
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(__dirname + "/public"));
 otplib.authenticator.options = {
