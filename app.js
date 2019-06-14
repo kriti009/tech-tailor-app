@@ -33,7 +33,12 @@ app.use(express.static(__dirname + "/public"));
 otplib.authenticator.options = {
     step: 120,
   };
+<<<<<<< HEAD
 
+=======
+const opts = otplib.authenticator.options;
+console.log(opts);
+>>>>>>> origin/master
 //seeding DB
 // seedDB();
 // seedUser();
@@ -49,7 +54,11 @@ var otp_secret = "N4YGKYRTNFFGMTZYLB4U2L3OJZGFQYLV";
 app.get('/generate_otp/:no', (req,res)=>{
     var phone_no = req.params.no;
     const token = otplib.authenticator.generate(otp_secret);
+<<<<<<< HEAD
     res.json({success: true, token: token});
+=======
+    res.json({success: true, otp_secret: otp_secret, token: token});
+>>>>>>> origin/master
 });
 app.post('/signup/verify_otp', (req,res)=>{    
     var user_token = req.query.token;
