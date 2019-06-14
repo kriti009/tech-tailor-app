@@ -30,7 +30,11 @@ app.set('superSecret', config.secret);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(__dirname + "/public"));
-
+otplib.authenticator.options = {
+    step: 120,
+  };
+const opts = otplib.authenticator.options;
+console.log(opts);
 //seeding DB
 // seedDB();
 // seedUser();
