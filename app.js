@@ -14,14 +14,15 @@ var Order = require("./models/order");
 var Category = require("./models/category");
 var Cart = require('./models/cart');
 var Product = require('./models/product');
+var JwtDevice = require("./models/jwtDevice");
 var seedDB = require("./seedDb");
 var seedUser = require("./seedUser");
 var seedCategory = require("./seedCategory");
 
 // mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor
-var mongoDB = 'mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor';
-// mongoose.connect("mongodb://localhost:27017/tech-tailor",{ useNewUrlParser: true});
-mongoose.connect(mongoDB);
+// var mongoDB = 'mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor';
+mongoose.connect("mongodb://localhost:27017/tech-tailor",{ useNewUrlParser: true});
+// mongoose.connect(mongoDB);
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
@@ -30,9 +31,7 @@ app.set('superSecret', config.secret);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(__dirname + "/public"));
-otplib.authenticator.options = {
-    step: 120,
-  };
+
 //seeding DB
 // seedDB();
 // seedUser();
@@ -64,22 +63,7 @@ app.post('/signup/verify_otp', (req,res)=>{
     if(otplib.authenticator.check(user_token, otp_secret)){
         // res.json({success: true, message: "OTP matched!"});
         User.create(new_user).then((user)=>{
-            // const payload = {
-            //     name: user.name,
-            //     device_id: device_id,
-            // };
-            // var token = jwt.sign(payload, app.get('superSecret'), {
-            //     expiresIn: '24h' //  
-            // });
-            // user.jwtToken.push(token);
-            // user.save();
-            // //return the info including token as json
-            // res.json({
-            //     success: true,
-            //     message: 'token generated',
-            //     user: user,
-            // });
-            res.send(generateNewJWT(user, device_id));
+            res.json(generateNewJWT(user, device_id));
         })
     }
     else
@@ -96,13 +80,21 @@ app.post('/login/verify_otp', (req, res)=>{
             if(err){
                 console.log(err);
             }else{
-                var decoded = [];
-                user.jwtToken.forEach((t)=>{
-                    if(jwtDecode(t).device_id == device_id)
-                        res.json({success: true, message: "welcome back "+ jwtDecode(t).name});
+                // console.log(user);
+                // user.jwtToken.forEach((t)=>{
+                //     if(jwtDecode(t).device_id == device_id)
+                //         res.json({success: true, message: "welcome back "+ jwtDecode(t).name});
+                // });
+                JwtDevice.findOne({device_id : device_id , user_id: user._id}).exec().then((result)=>{
+                   if(result!=null){
+                        res.json({success: true, message: "welcome back "+ user.name});
+                   }else{
+                        res.json(generateNewJWT(user, device_id));
+                   }
                 });
+                
                 //generate new token with encoded device id and push it into jwtToken param in User
-                res.send(generateNewJWT(user, device_id));
+                
             }
         })
         
@@ -117,10 +109,7 @@ app.post('/signup', (req,res)=>{
 });
 app.post('/login', (req, res)=>{
     var phone_no = req.query.phone_no;
-    // console.log(phone_no);
     User.findOne({'phone_no': phone_no}).then((user)=>{
-        if(user==null)
-            res.status(404).json({success: false, message: "User does no exixts"});
         res.redirect("/generate_otp/"+phone_no);
     }).catch((e) => {
         res.status(404).json({success: false, message: "User does no exixts"});
@@ -227,13 +216,22 @@ function generateNewJWT (user , device_id){
         expiresIn: '24h' //  
     });
     user.jwtToken.push(token);
+    var newToken = {
+        jwt: token,
+        device_id: device_id,
+        user_id: user._id
+    }
     user.save();
+    // console.log(token);
+    JwtDevice.create((newToken), ()=>{})
+    
+        return ({
+            success: true,
+            message: 'token generated',
+            user: user,
+        });
     //return the info including token as json
-     return {
-        success: true,
-        message: 'token generated',
-        user: user,
-    };
+    
 }
 
 
