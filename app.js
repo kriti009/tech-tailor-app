@@ -20,9 +20,9 @@ var seedUser = require("./seedUser");
 var seedCategory = require("./seedCategory");
 
 // mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor
-// var mongoDB = 'mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor';
-mongoose.connect("mongodb://localhost:27017/tech-tailor",{ useNewUrlParser: true});
-// mongoose.connect(mongoDB);
+var mongoDB = 'mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor';
+// mongoose.connect("mongodb://localhost:27017/tech-tailor",{ useNewUrlParser: true});
+mongoose.connect(mongoDB);
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
