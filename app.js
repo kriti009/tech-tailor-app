@@ -43,12 +43,12 @@ app.use(express.static(__dirname + "/public"));
 //OTP Config
 otplib.authenticator.options = {
     step: 2000,
-    window: 1
+    window: [1, 0]
 };
 
 
-// var secret = otplib.authenticator.generateSecret();
-var otp_secret = "N4YGKYRTNFFGMTZYLB4U2L3OJZGFQYLV";
+// var otp_secret = otplib.authenticator.generateSecret();
+const otp_secret = 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD';
 
 app.get('/generate_otp/:no', (req,res)=>{
     var phone_no = req.params.no;
@@ -116,6 +116,8 @@ app.post('/signup', (req,res)=>{
 app.post('/login', (req, res)=>{
     var phone_no = req.query.phone_no;
     User.findOne({'phone_no': phone_no}).then((user)=>{
+        if(user==null)
+            res.status(404).json({success: false, message: "User does no exixts"});
         res.redirect("/generate_otp/"+phone_no);
     }).catch((e) => {
         res.status(404).json({success: false, message: "User does no exixts"});
