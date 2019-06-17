@@ -40,6 +40,12 @@ app.use(express.static(__dirname + "/public"));
 // app.set("view engine", "ejs");
 // app.use(methodOverride("_method"));
 
+//OTP Config
+otplib.authenticator.options = {
+    step: 2000,
+    window: 1
+};
+
 
 // var secret = otplib.authenticator.generateSecret();
 var otp_secret = "N4YGKYRTNFFGMTZYLB4U2L3OJZGFQYLV";
