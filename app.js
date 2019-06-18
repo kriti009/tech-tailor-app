@@ -215,7 +215,9 @@ app.put('/update_status', (req, res)=>{
     var new_status = req.query.status;
     Order.findById(req.query.order_id).then((result) => {
         result.status = new_status;
-        result.save();
+        result.save(()=>{
+            console.log("Status upadated");
+        });
         res.status(202).json(result);
     });
 });
