@@ -5,7 +5,8 @@ var express = require('express'),
     speakeasy = require('speakeasy'),
     otplib = require('otplib'),
     jwt = require('jsonwebtoken'),
-    jwtDecode = require('jwt-decode');
+    jwtDecode = require('jwt-decode'),
+    cors = require('cors');
     
 var config = require('./config');
 //requiring models
@@ -16,6 +17,7 @@ var Cart = require('./models/cart');
 var Product = require('./models/product');
 var JwtDevice = require("./models/jwtDevice");
 var seedDB = require("./seedDb");
+var seedOrder = require("./seedOrder");
 var seedUser = require("./seedUser");
 var seedCategory = require("./seedCategory");
 
@@ -27,13 +29,16 @@ mongoose.Promise = global.Promise;
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
+app.use(cors());
 app.set('superSecret', config.secret);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(__dirname + "/public"));
 
+
 //seeding DB
 // seedDB();
+// seedOrder();
 // seedUser();
 // seedCategory();
 
