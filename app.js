@@ -47,8 +47,7 @@ app.use(express.static(__dirname + "/public"));
 
 //OTP Config
 otplib.authenticator.options = {
-    step: 2000,
-    window: [1, 0]
+    step: 2000
 };
 
 
@@ -98,7 +97,7 @@ app.post('/login/verify_otp', (req, res)=>{
                 // });
                 JwtDevice.findOne({device_id : device_id , user_id: user._id}).exec().then((result)=>{
                    if(result!=null){
-                        res.json({success: true, message: "welcome back "+ user.name});
+                        res.json({success: true, message: "welcome back "+ user.name, user_id: user._id});
                    }else{
                         res.json(generateNewJWT(user, device_id));
                    }
@@ -212,8 +211,11 @@ app.post('/place_order', (req, res) => {
     });
 });
 app.put('/update_status', (req, res)=>{
-    var new_status = req.query.status;
-    Order.findById(req.query.order_id).then((result) => {
+    var new_status = req.body.status;
+    // console.log(new_status);
+    // console.log(req.query.order_id);
+    // console.log(req.body.order_id);
+    Order.findById(req.body.order_id).then((result) => {
         result.status = new_status;
         result.save(()=>{
             console.log("Status upadated");
@@ -243,13 +245,13 @@ function generateNewJWT (user , device_id){
         return ({
             success: true,
             message: 'token generated',
-            user: user,
+            user_id: user._id,
         });
     //return the info including token as json
     
 }
 
 
-app.listen( process.env.PORT || 8000  , () => {
+app.listen( process.env.PORT || 8080  , () => {
     console.log("Server Connected");
 })
