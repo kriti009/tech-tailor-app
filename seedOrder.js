@@ -4,40 +4,65 @@ var Order = require("./models/order");
 
 var data = [
     {
-        product_id : "5d00cc5c6dc1380017a2391b",
-        user_id : "5d023b68d5cc630017233954",
+        product : ["5d00cc5c6dc1380017a2391b", "5d00cc5c6dc1380017a2391a"],
+        user_id : "5d11effa5e770b34d86bc2a7",
         pickup_address: "ashwani nagar, raipur,cg",
         pickup_date : Date.now(),
         pickup_time :"3pm",
         status: "order placed",
+        total_quantity: 3,
+        audit : [{
+            status: "order placed",
+            date: Date.now(),
+        }]
     },{
-        product_id : "5d00cc5c6dc1380017a2391a",
-        user_id : "5d04d0db084231001788185a",
+        product : ["5d00cc5c6dc1380017a2391a"],
+        user_id : "5d11effa5e770b34d86bc2a9",
         pickup_address: "Kudlu Gate, bangalore",
         pickup_date : Date.now(),
         pickup_time :"12Am",
         status: "order placed",
+        total_quantity: 2,
+        audit : [{
+            status: "order placed",
+            date: Date.now(),
+        }]
     },{
-        product_id : "5d00cc5c6dc1380017a2391e",
-        user_id : "5d04d0db084231001788185a",
+        product : ["5d00cc5c6dc1380017a2391e"],
+        user_id : "5d11effa5e770b34d86bc2a8",
         pickup_address: "Kudlu Gate, bangalore",
         pickup_date : Date.now(),
         pickup_time :"5AM",
         status: "alteration in progress",
+        total_quantity: 3,
+        audit : [{
+            status: "order placed",
+            date: Date.now(),
+        }]
     },{
-        product_id : "5d00cc5c6dc1380017a2391f",
-        user_id : "5d076ce20d753a0017cdf436",
+        product : ["5d00cc5c6dc1380017a2391f"],
+        user_id : "5d11effa5e770b34d86bc2a8",
         pickup_address: "Kormangalam, bangalore",
         pickup_date : Date.now(),
         pickup_time :"1Pm",
         status: "order picked-up",
+        total_quantity: 5,
+        audit : [{
+            status: "order placed",
+            date: Date.now(),
+        }]
     },{
-        product_id : "5d00cc5c6dc1380017a2391a",
-        user_id : "5d077300b932a100175fb0b1",
+        product : ["5d00cc5c6dc1380017a2391f"],
+        user_id : "5d11effa5e770b34d86bc2a7",
         pickup_address: "Durg, Cg",
         pickup_date : Date.now(),
         pickup_time :"3pm",
         status: "order delivered",
+        total_quantity: 1,
+        audit : [{
+            status: "order placed",
+            date: Date.now(),
+        }]
     },
 ]
 function seedOrder(){

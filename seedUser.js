@@ -6,17 +6,17 @@ var data = [
     {
         name: "kriti dewangan",
         phone_no : "8103116393",
-        address: ["Raipur, Chhattisgarh",] ,
+        address: ["5d11ef4c550324195040f1ea","5d11ef4c550324195040f1eb"] ,
         email : "kriti.ritu.dew@gmail.com"
     },{
         name: "Yamini Ogare",
         phone_no : "8102445393",
-        address: ["Durg, Chhattisgarh",],
+        address: ["5d11ef4c550324195040f1eb","5d11ef4c550324195040f1ec","5d11ef4c550324195040f1ee","5d11ef4c550324195040f1ef"],
         email : "yamini_ogare@gmail.com"
     },{
         name: "Harman Singh",
         phone_no : "9121116393",
-        address: ["Bangalore",],
+        address: ["5d11ef4c550324195040f1ed","5d11ef4c550324195040f1ee","5d11ef4c550324195040f1eb"],
         email : "harman.singh@gmail.com"
     }
 ]

@@ -11,7 +11,9 @@ var express = require('express'),
 var config = require('./config');
 //requiring models
 var User = require('./models/user');
+var Admin = require('./models/admin');
 var Order = require("./models/order");
+var Address = require("./models/address");
 var Category = require("./models/category");
 var Cart = require('./models/cart');
 var Product = require('./models/product');
@@ -20,6 +22,7 @@ var seedDB = require("./seedDb");
 var seedOrder = require("./seedOrder");
 var seedUser = require("./seedUser");
 var seedCategory = require("./seedCategory");
+var seedAddress = require("./seedAddress");
 
 // mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor
 var mongoDB = 'mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor';
@@ -35,12 +38,20 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(__dirname + "/public"));
 
-
+// var newAdmin = {
+//     username: "Admin123",
+//     password: "password",
+//     role: "admin" 
+// }
+// Admin.create(newAdmin, ()=>{
+//     console.log("new admin added");
+// })
 //seeding DB
 // seedDB();
 // seedOrder();
 // seedUser();
 // seedCategory();
+// seedAddress();
 
 // app.set("view engine", "ejs");
 // app.use(methodOverride("_method"));
@@ -113,6 +124,7 @@ app.post('/login/verify_otp', (req, res)=>{
     }
     
 })
+
 app.post('/signup', (req,res)=>{
     var phone_no = req.query.phone_no;
     res.redirect('/generate_otp/'+phone_no);
@@ -126,8 +138,39 @@ app.post('/login', (req, res)=>{
     }).catch((e) => {
         res.status(404).json({success: false, message: "User does no exixts"});
     })
-    
 });
+
+app.put('/admin-login', (req, res) => {
+    var username = req.body.username;
+    var password  = req.body.password;
+    Admin.findOne({'username' : username, 'password': password}).then((user)=>{
+        if(user == null)
+            res.status(404).json({success: false, message: "Invalid username or Password"});
+        else{
+            if(user.jwtToken[0] != null)
+                res.status(200).json({success: true, message: "welcome back "+user.username})
+            else{
+                const payload = {
+                    username: user.username,
+                    role: 'admin'
+                };
+                var token = jwt.sign(payload, app.get('superSecret'), {
+                    expiresIn: '240h' //  
+                });
+                // console.log(token);
+                user.jwtToken.push(token);
+                user.save(()=>{
+                    // console.log("token saved");
+                    // console.log(user.jwtToken[0]);
+                    res.status(201).json({success:true, message:"new token generated" });
+                });
+                // console.log(token);
+                
+            }
+        }
+    }).catch(()=>{})
+});
+
 app.get('/products', (req, res) => {
     Product.find({}).then((data) => {
         res.status(200).json(data);
@@ -188,8 +231,8 @@ app.post('/add_to_cart', (req, res) => {
     })
 });
 app.get('/get_all_orders', (req, res)=>{
-    Order.find({}).then((result)=>{
-        res.status(200).json(result);
+    Order.find({}).populate('user_id').populate("product").then((result)=>{
+        res.status(200).json(result);    
     });
 });
 app.post('/place_order', (req, res) => {
@@ -212,9 +255,8 @@ app.post('/place_order', (req, res) => {
 });
 app.put('/update_status', (req, res)=>{
     var new_status = req.body.status;
-    // console.log(new_status);
-    // console.log(req.query.order_id);
-    // console.log(req.body.order_id);
+    // console.log(req);
+    // console.log(res);
     Order.findById(req.body.order_id).then((result) => {
         result.status = new_status;
         result.save(()=>{
@@ -223,7 +265,70 @@ app.put('/update_status', (req, res)=>{
         res.status(202).json(result);
     });
 });
-
+app.put('/assign_technician', (req, res)=>{
+    Order.findById(req.body.order_id).then((result)=>{
+        // console.log(req.body.technician);
+        result.technician = req.body.technician;
+        result.save(()=>{
+            console.log("new technician assigned");
+            // console.log(result);
+        });
+        res.status(202).json(result);
+    });
+});
+app.get('/get_address',(req, res)=>{
+    var user_id = req.query.user_id;
+    User.findById(user_id).populate("address").then((result)=>{
+        if(result==null){
+            res.status(404).json({success:false, message:"NO such user or address exits"})
+        }else{
+            res.status(200).json({success:true, address: result.address})
+        }
+    })
+});
+app.put('/edit_address', (req, res)=>{
+    var edited_address = {
+        pincode : req.query.pincode,
+        area : req.query.area,
+        city: req.query.city,
+        state: req.query.state,
+        landmark: req.query.landmark,
+    };
+    var address_id = req.query.address_id;
+    // var user_id = req.query.user_id;
+    Address.findByIdAndUpdate(address_id, edited_address).then((result)=>{
+        if(result==null)
+            res.status(400).json({success: false, message: "error"});
+        else
+            res.status(200).json({success: true, message:"saved changes"});
+    }).catch(()=>{
+        res.status(400).json({success: false, message: "internal error"})
+    })
+});
+app.post('/add_new_address', (req,res)=>{
+    var new_address = {
+        pincode : req.query.pincode,
+        area : req.query.area,
+        city: req.query.city,
+        state: req.query.state,
+        landmark: req.query.landmark,
+    };
+    var user_id = req.query.user_id;
+    Address.create(new_address).then((address)=>{
+        User.findById(user_id).then((user)=>{
+            if(user==null)
+                res.status(400).json({success: false, message: "internal error"});
+            else{
+                user.address.push(address._id);
+                user.save(()=>{
+                    res.status(200).json({success: true, message: "new address added"})
+                });
+            }
+        })
+    }).catch(()=>{
+        res.status(400).json({success: falses, message: "internal error"});
+    })
+});
 function generateNewJWT (user , device_id){
     const payload = {
         name: user.name,
