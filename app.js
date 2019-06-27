@@ -294,6 +294,9 @@ app.put('/edit_address', (req, res)=>{
         state: req.query.state,
         landmark: req.query.landmark,
     };
+    if(edited_address.landmark==null){
+        edited_address.landmark = "";
+    };
     var address_id = req.query.address_id;
     // var user_id = req.query.user_id;
     Address.findByIdAndUpdate(address_id, edited_address).then((result)=>{
@@ -312,6 +315,9 @@ app.post('/add_new_address', (req,res)=>{
         city: req.query.city,
         state: req.query.state,
         landmark: req.query.landmark,
+    };
+    if(edited_address.landmark==null){
+        edited_address.landmark = "";
     };
     var user_id = req.query.user_id;
     Address.create(new_address).then((address)=>{
