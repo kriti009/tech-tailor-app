@@ -321,12 +321,23 @@ app.post('/add_new_address', (req,res)=>{
             else{
                 user.address.push(address._id);
                 user.save(()=>{
-                    res.status(200).json({success: true, message: "new address added"})
+                    res.status(200).json({success: true, message: "new address added" ,address_id: address._id});
                 });
             }
         })
     }).catch(()=>{
         res.status(400).json({success: falses, message: "internal error"});
+    })
+});
+app.post('/add_new_category', (req, res)=>{
+    var new_category = {
+        name : req.body.name,
+        image_url : req.body.image_url,
+    };
+    Category.create(new_category).then(()=>{
+        res.status(200).json({success: true, message: "New Category saved"});
+    }).catch(()=>{
+        res.status(400).json({success: true, message: "Internal error"});
     })
 });
 function generateNewJWT (user , device_id){
