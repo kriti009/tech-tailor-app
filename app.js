@@ -181,6 +181,45 @@ app.get('/products/:id', (req, res) =>{
         res.status(200).json(result)
     })
 })
+app.put('/products', (req, res)=>{
+    var data = {
+        service_type : req.body.service_type,
+        gender : req.body.gender,
+        image_url: req.body.image_url,
+        short_description: req.body.short_description,
+        description: req.body.description,
+        alteration_price : req.body.alteration_price,
+    }
+    Product.findByIdAndUpdate(req.body._id, data).then((result)=>{
+        if(result != null){
+            res.status(200).json({success: true, message: "Product Updated"});
+        }
+    }).catch(()=>{
+        res.status(400).json({success: false, message: "Internal Error"});
+    })
+});
+app.post("/products", (req, res)=>{
+    var data = {
+        service_type : req.body.service_type,
+        gender : req.body.gender,
+        image_url: req.body.image_url,
+        short_description: req.body.short_description,
+        description: req.body.description,
+        alteration_price : req.body.alteration_price,
+    }
+    Product.create(data).then((result)=>{
+        res.status(200).json({success: true, message: "new product added", product_id: result._id});
+    }).catch(()=>{
+        res.status(400).json({success: false, message:"Internal error, could not add product"})
+    })
+})
+app.delete("/products", (req, res)=>{
+    Product.findByIdAndDelete(req.body._id).then(()=>{
+        res.status(200).json({success: true, message:"Product Deleted succesfully"});
+    }).catch(()=>{
+        res.status(400).json({success: false, message: "Internal error, Can't Delete this item"})
+    })
+});
 app.get('/get_user_details', (req, res) => {
     User.findById(req.query.user_id, (err, user) => {
         if(err){
@@ -231,25 +270,32 @@ app.post('/add_to_cart', (req, res) => {
     })
 });
 app.get('/get_all_orders', (req, res)=>{
-    Order.find({}).populate('user_id').populate("product").then((result)=>{
+    Order.find({}).populate('user_id').populate("product.product_id").populate("pickup_address").then((result)=>{
         res.status(200).json(result);    
     });
 });
 app.post('/place_order', (req, res) => {
     var newOrder = {
-        product_id : req.query.product_id,
-        user_id : req.query.user_id,
-        pickup_date: req.query.pickup_date,
-        pickup_time : req.query.pickup_time,    
-        pickup_address : req.query.pickup_address,
+        product : req.body.product,
+        user_id : req.body.user_id,
+        pickup_date: req.body.pickup_date,   
+        pickup_address : req.body.pickup_address,
         status: 'order placed',
     };
+    var auditTemplate = {
+        status: 'order placed',
+        date : Date.now(),
+    }
     Order.create(newOrder, (err, order) => {
         if(err){
-            console.log(err);
+            res.status(400).json({success: false, message: "couldn't place your order"})
         }else{
-            res.status(201).send({'message' : "new order placed"});
-            console.log("order placed and your order Id is : ", order._id);
+            order.audit.push(auditTemplate);
+            order.save(()=>{
+                res.status(201).json({success: true,message : "new order placed"});
+                console.log("order placed and your order is : ", order._id);
+            });
+            
         }
     });
 });
@@ -257,8 +303,14 @@ app.put('/update_status', (req, res)=>{
     var new_status = req.body.status;
     // console.log(req);
     // console.log(res);
+    var auditTemplate = {
+        status: new_status,
+        date : Date.now(),
+        updated_by: "Kriti_dew"
+    };
     Order.findById(req.body.order_id).then((result) => {
         result.status = new_status;
+        result.audit.push(auditTemplate);
         result.save(()=>{
             console.log("Status upadated");
         });
@@ -266,9 +318,16 @@ app.put('/update_status', (req, res)=>{
     });
 });
 app.put('/assign_technician', (req, res)=>{
+    var auditTemplate = {
+        status: "technician assigned",
+        date : Date.now(),
+        updated_by: "Kriti_dew",
+        remark: `technician assigned: ${req.body.technician}`,
+    };
     Order.findById(req.body.order_id).then((result)=>{
         // console.log(req.body.technician);
         result.technician = req.body.technician;
+        result.audit.push(auditTemplate);
         result.save(()=>{
             console.log("new technician assigned");
             // console.log(result);
