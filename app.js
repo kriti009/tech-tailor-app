@@ -221,12 +221,12 @@ app.delete("/products", (req, res)=>{
     })
 });
 app.get('/get_user_details', (req, res) => {
-    User.findById(req.query.user_id, (err, user) => {
-        if(err){
-            console.log(err);
-        }else{
-            res.json(user);
-        }
+    User.findById(req.query.user_id).populate("address").then((result)=>{
+        if(result==null)
+            res.status(400).json({success: false, message: "User not Found"});
+        res.status(200).json(result);
+    }).catch(()=>{
+        res.status(400).json({success: false, message: "Internal error"});
     })
 });
 app.get("/get_category", (req, res)=> {
