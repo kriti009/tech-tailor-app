@@ -146,6 +146,7 @@ app.post('/login', (req, res)=>{
 app.put('/admin-login', (req, res) => {
     var username = req.body.username;
     var password  = req.body.password;
+    console.log("request for admin login");
     Admin.findOne({'username' : username, 'password': password}).then((user)=>{
         if(user == null)
             res.status(404).json({success: false, message: "Invalid username or Password"});
@@ -312,7 +313,7 @@ app.put('/update_status', (req, res)=>{
     var auditTemplate = {
         status: new_status,
         date : Date.now(),
-        updated_by: "Kriti_dew"
+        updated_by: req.body.updated_by,
     };
     Order.findById(req.body.order_id).then((result) => {
         result.status = new_status;
@@ -327,12 +328,13 @@ app.put('/assign_technician', (req, res)=>{
     var auditTemplate = {
         status: "technician assigned",
         date : Date.now(),
-        updated_by: "Kriti_dew",
+        updated_by: req.body.updated_by,
         remark: `technician assigned: ${req.body.technician}`,
     };
     Order.findById(req.body.order_id).then((result)=>{
         // console.log(req.body.technician);
         result.technician = req.body.technician;
+        result.status = "technician assigned";
         result.audit.push(auditTemplate);
         result.save(()=>{
             console.log("new technician assigned");
