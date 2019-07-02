@@ -6,7 +6,8 @@ var express = require('express'),
     otplib = require('otplib'),
     jwt = require('jsonwebtoken'),
     jwtDecode = require('jwt-decode'),
-    cors = require('cors');
+    cors = require('cors'),
+    dateFormat = require('dateformat');
     
 var config = require('./config');
 //requiring models
@@ -23,6 +24,8 @@ var seedOrder = require("./seedOrder");
 var seedUser = require("./seedUser");
 var seedCategory = require("./seedCategory");
 var seedAddress = require("./seedAddress");
+//requiring middleware
+var middleware = require("./middleware");
 
 // mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor
 var mongoDB = 'mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor';
@@ -148,7 +151,7 @@ app.put('/admin-login', (req, res) => {
             res.status(404).json({success: false, message: "Invalid username or Password"});
         else{
             if(user.jwtToken[0] != null)
-                res.status(200).json({success: true, message: "welcome back "+user.username})
+                res.status(200).json({success: true,message: "welcome back "+user.username, token:user.jwtToken[0] })
             else{
                 const payload = {
                     username: user.username,
@@ -162,7 +165,7 @@ app.put('/admin-login', (req, res) => {
                 user.save(()=>{
                     // console.log("token saved");
                     // console.log(user.jwtToken[0]);
-                    res.status(201).json({success:true, message:"new token generated" });
+                    res.status(201).json({success:true, message:"new token generated",token: token });
                 });
                 // console.log(token);
                 
@@ -171,7 +174,7 @@ app.put('/admin-login', (req, res) => {
     }).catch(()=>{})
 });
 
-app.get('/products', (req, res) => {
+app.get('/products',(req, res) => {
     Product.find({}).then((data) => {
         res.status(200).json(data);
     })
@@ -269,16 +272,19 @@ app.post('/add_to_cart', (req, res) => {
         res.status(409);
     })
 });
-app.get('/get_all_orders', (req, res)=>{
+app.get('/get_all_orders' , (req, res)=>{
     Order.find({}).populate('user_id').populate("product.product_id").populate("pickup_address").then((result)=>{
         res.status(200).json(result);    
     });
 });
 app.post('/place_order', (req, res) => {
+    console.log(req.body.pickup_date);
+    console.log(dateFormat(req.body.pickup_date, "isoDateTime"));
     var newOrder = {
         product : req.body.product,
+        pickup_date : dateFormat(req.body.pickup_date, "isoDateTime"),
         user_id : req.body.user_id,
-        pickup_date: req.body.pickup_date,   
+        // pickup_date: req.body.pickup_date,   
         pickup_address : req.body.pickup_address,
         status: 'order placed',
     };
