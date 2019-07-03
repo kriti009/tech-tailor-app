@@ -29,6 +29,7 @@ var orderSchema = new mongoose.Schema({
 
     technician: {type: String},
     total_quantity: {type: Number},
+    price : {type: Number},
     status : {type: String , enum: ['order placed','technician assigned','order picked-up','alteration in progress', 'order delivered']},
 },{timestamps: true});
 

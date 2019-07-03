@@ -277,6 +277,15 @@ app.post('/add_to_cart', (req, res) => {
         res.status(409);
     })
 });
+app.get('/get_user_orders', (req,res)=>{
+    User.findById(req.query.user_id).populate('orders').then((user)=>{
+        if(user==null)
+            res.status(404).json({success: false, message: "No such user/orders exits"});
+        res.status(200).json(user.orders);
+    }).catch(()=>{
+        res.status(400).json({success: false, message: "Internal error"});
+    })
+});
 app.get('/get_all_orders' , (req, res)=>{
     Order.find({}).populate('user_id').populate("product.product_id").populate("pickup_address").then((result)=>{
         res.status(200).json(result);    
@@ -291,24 +300,35 @@ app.post('/place_order', (req, res) => {
         user_id : req.body.user_id,
         // pickup_date: req.body.pickup_date,   
         pickup_address : req.body.pickup_address,
+        price: req.body.price,
         status: 'order placed',
     };
     var auditTemplate = {
         status: 'order placed',
         date : Date.now(),
     }
-    Order.create(newOrder, (err, order) => {
-        if(err){
-            res.status(400).json({success: false, message: "couldn't place your order"})
-        }else{
-            order.audit.push(auditTemplate);
-            order.save(()=>{
-                res.status(201).json({success: true,message : "new order placed"});
-                console.log("order placed and your order is : ", order._id);
+    User.findById(req.body.user_id).then((user)=>{
+        if(user==null)
+            res.status(404).json({success:false, message:"Wrong user credentials"});
+        else{
+            Order.create(newOrder, (err, order) => {
+                if(err){
+                    res.status(400).json({success: false, message: "couldn't place your order"})
+                }else{
+                    order.audit.push(auditTemplate);
+                    user.orders.push(order._id);
+                    order.save(()=>{
+                        user.save(()=>{
+                            res.status(201).json({success: true,message : "new order placed"});
+                            console.log("order placed and your order is : ", order._id);
+                        })
+                        
+                    });
+                    
+                }
             });
-            
         }
-    });
+    }).catch()
 });
 app.put('/update_status', (req, res)=>{
     var new_status = req.body.status;

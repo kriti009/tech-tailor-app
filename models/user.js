@@ -10,6 +10,12 @@ var userSchema = new mongoose.Schema({
             ref: "Address"
         }
     ],
+    orders: [
+        {
+            type : mongoose.Schema.Types.ObjectId,
+            ref: "Order"
+        }
+    ],
     email : {type: String},
     jwtToken: [{type:String}],
     role : {type: String , enum: ['customer','admin','technician']}
