@@ -228,7 +228,11 @@ app.get('/get_user_details', (req, res) => {
     User.findById(req.query.user_id).populate("address").then((result)=>{
         if(result==null)
             res.status(400).json({success: false, message: "User not Found"});
-        res.status(200).json(result);
+        var address = result.address.map((h,i)=>(
+            h.area.concat(", ",h.city, ", ",h.state,", ",h.pincode)
+        ));
+        // result.address.concat(' ', str2)
+        res.status(200).json({success: true, result: result, address: address});
     }).catch(()=>{
         res.status(400).json({success: false, message: "Internal error"});
     })
