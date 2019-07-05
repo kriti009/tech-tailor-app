@@ -7,7 +7,8 @@ var express = require('express'),
     jwt = require('jsonwebtoken'),
     jwtDecode = require('jwt-decode'),
     cors = require('cors'),
-    dateFormat = require('dateformat');
+    dateFormat = require('dateformat'),
+    imageDataURI = require('image-data-uri');
     
 var config = require('./config');
 //requiring models
@@ -49,6 +50,13 @@ app.use(express.static(__dirname + "/public"));
 // Admin.create(newAdmin, ()=>{
 //     console.log("new admin added");
 // })
+// console.log(imageDataURI.decode('data:image/png;base64,SOMEPNGDATAURI/wD/'));
+// var imageData = 'https://cdn.pixabay.com/photo/2016/03/09/16/50/city-street-1246870_960_720.jpg';
+// let dataBuffer = new Buffer(imageData);
+// let mediaType = 'PNG';
+// console.log(imageDataURI.encode(dataBuffer, mediaType));
+// // imageDataURI.encodeFromURL(imageData).then(res=> console.log(res));
+// console.log(imageDataURI.decode( imageDataURI.encode(dataBuffer, mediaType)));
 //seeding DB
 // seedDB();
 // seedOrder();
@@ -232,7 +240,7 @@ app.get('/get_user_details', (req, res) => {
             h.area.concat(", ",h.city, ", ",h.state,", ",h.pincode)
         ));
         // result.address.concat(' ', str2)
-        res.status(200).json({success: true, result: result, address: address});
+        res.status(200).json({name: result.name, email: result.email, phone_no: result.phone_no, address :address});
     }).catch(()=>{
         res.status(400).json({success: false, message: "Internal error"});
     })
@@ -286,6 +294,13 @@ app.get('/get_user_orders', (req,res)=>{
         res.status(400).json({success: false, message: "Internal error"});
     })
 });
+app.get('/get_order_details', (req, res)=>{
+    Order.findById(req.query.order_id).populate('product.product_id').populate('pickup_address').then((order)=>{
+        if(order==null)
+            res.status(404).json({success: false, message: "No such order exits"});
+        res.status(200).json(order);
+    }).catch()
+})
 app.get('/get_all_orders' , (req, res)=>{
     Order.find({}).populate('user_id').populate("product.product_id").populate("pickup_address").then((result)=>{
         res.status(200).json(result);    
