@@ -286,7 +286,9 @@ app.post('/add_to_cart', (req, res) => {
     })
 });
 app.get('/get_user_orders', (req,res)=>{
-    User.findById(req.query.user_id).populate('orders').then((user)=>{
+    User.findById(req.query.user_id)
+    .populate({path: 'orders', populate: { path: 'pickup_address' }})
+    .then((user)=>{
         if(user==null)
             res.status(404).json({success: false, message: "No such user/orders exits"});
         res.status(200).json(user.orders);
