@@ -298,7 +298,15 @@ app.get('/get_order_details', (req, res)=>{
     Order.findById(req.query.order_id).populate('product.product_id').populate('pickup_address').then((order)=>{
         if(order==null)
             res.status(404).json({success: false, message: "No such order exits"});
-        res.status(200).json(order);
+        var address = order.pickup_address.area.concat(", ",order.pickup_address.city, ", ",order.pickup_address.state,", ",order.pickup_address.pincode);
+        // var sentOrder = order;
+        // sentOrder.pickup_address= address;
+        // console.log(sentOrder);
+        // sentOrder.save(()=>{
+        //     console.log(sentOrder);
+            res.status(200).json({order: order, address: address});
+        // });
+        
     }).catch()
 })
 app.get('/get_all_orders' , (req, res)=>{
