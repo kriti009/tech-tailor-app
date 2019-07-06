@@ -304,7 +304,7 @@ app.get('/get_order_details', (req, res)=>{
         // console.log(sentOrder);
         // sentOrder.save(()=>{
         //     console.log(sentOrder);
-            res.status(200).json({order: order, address: address});
+            res.status(200).json(order);
         // });
         
     }).catch()
