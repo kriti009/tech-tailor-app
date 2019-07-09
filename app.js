@@ -154,7 +154,7 @@ app.post('/login', (req, res)=>{
 app.put('/admin-login', (req, res) => {
     var username = req.body.username;
     var password  = req.body.password;
-    console.log("request for admin login");
+    // console.log("request for admin login");
     Admin.findOne({'username' : username, 'password': password}).then((user)=>{
         if(user == null)
             res.status(404).json({success: false, message: "Invalid username or Password"});
