@@ -465,6 +465,52 @@ app.post('/add_new_category', (req, res)=>{
         res.status(400).json({success: true, message: "Internal error"});
     })
 });
+
+app.get('/technician',(req, res)=>{
+    Technician.find({}).then((result)=>{
+        res.status('200').json(result);
+    }).catch(()=>{
+        res.status('400').json({success:false, message: "internal Error"});
+    })
+})
+app.delete('/technician', (req, res)=>{
+    Technician.findByIdAndDelete(req.body._id).then(()=>{
+        res.status(200).json({success: true, message:"Technician Removed succesfully"});
+    }).catch(()=>{
+        res.status(400).json({success: false, message: "Internal error, Can't Delete this item"})
+    })
+})
+app.post('/technician', (req, res)=>{
+    var data = {
+        name: req.body.name,
+        address: req.body.address,
+        phone_no : req.body.phone_no
+    }
+    if(req.body.email!=null || req.body.email!=undefined)
+        data.email =  req.body.email;
+    Technician.create(data).then((result)=>{
+        res.status(200).json({success: true, message: "new Added", technician_id: result._id});
+    }).catch(()=>{
+        res.status(400).json({success: false, message:"Internal error, could not add"})
+    })
+})
+app.put('/technician', (req, res)=>{
+    var data = {
+        name: req.body.name,
+        address: req.body.address,
+        phone_no : req.body.phone_no
+    }
+    if(req.body.email!=null || req.body.email!=undefined)
+        data.email =  req.body.email;
+    Technician.findByIdAndUpdate(req.body._id, data).then((result)=>{
+        if(result != null){
+            res.status(200).json({success: true, message: " Updated"});
+        }
+    }).catch(()=>{
+        res.status(400).json({success: false, message: "Internal Error"});
+    })
+})
+
 function generateNewJWT (user , device_id){
     const payload = {
         name: user.name,
@@ -490,20 +536,6 @@ function generateNewJWT (user , device_id){
         });
     //return the info including token as json
 }
-app.get('/technician',(req, res)=>{
-    Technician.find({}).then((result)=>{
-        res.status('200').json(result);
-    }).catch(()=>{
-        res.status('400').json({success:false, message: "internal Error"});
-    })
-})
-app.post('/technician', (req, res)=>{
-
-})
-app.put('/technician', (req, res)=>{
-
-})
-
 
 app.listen( process.env.PORT || 8080  , () => {
     console.log("Server Connected");
