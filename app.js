@@ -18,6 +18,7 @@ var Order = require("./models/order");
 var Address = require("./models/address");
 var Category = require("./models/category");
 var Cart = require('./models/cart');
+var Technician = require("./models/technician");
 var Product = require('./models/product');
 var JwtDevice = require("./models/jwtDevice");
 var seedDB = require("./seedDb");
@@ -25,6 +26,7 @@ var seedOrder = require("./seedOrder");
 var seedUser = require("./seedUser");
 var seedCategory = require("./seedCategory");
 var seedAddress = require("./seedAddress");
+var seedTech = require("./seedTech");
 //requiring middleware
 var middleware = require("./middleware");
 
@@ -63,6 +65,7 @@ app.use(express.static(__dirname + "/public"));
 // seedUser();
 // seedCategory();
 // seedAddress();
+// seedTech();
 
 // app.set("view engine", "ejs");
 // app.use(methodOverride("_method"));
@@ -432,8 +435,8 @@ app.post('/add_new_address', (req,res)=>{
         state: req.query.state,
         landmark: req.query.landmark,
     };
-    if(edited_address.landmark==null){
-        edited_address.landmark = "";
+    if(new_address.landmark==null){
+        new_address.landmark = "";
     };
     var user_id = req.query.user_id;
     Address.create(new_address).then((address)=>{
