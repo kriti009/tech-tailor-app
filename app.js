@@ -435,8 +435,8 @@ app.post('/add_new_address', (req,res)=>{
         state: req.query.state,
         landmark: req.query.landmark,
     };
-    if(edited_address.landmark==null){
-        edited_address.landmark = "";
+    if(new_address.landmark==null){
+        new_address.landmark = "";
     };
     var user_id = req.query.user_id;
     Address.create(new_address).then((address)=>{
@@ -489,8 +489,20 @@ function generateNewJWT (user , device_id){
             user_id: user._id,
         });
     //return the info including token as json
-    
 }
+app.get('/technician',(req, res)=>{
+    Technician.find({}).then((result)=>{
+        res.status('200').json(result);
+    }).catch(()=>{
+        res.status('400').json({success:false, message: "internal Error"});
+    })
+})
+app.post('/technician', (req, res)=>{
+
+})
+app.put('/technician', (req, res)=>{
+
+})
 
 
 app.listen( process.env.PORT || 8080  , () => {
