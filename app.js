@@ -435,8 +435,8 @@ app.post('/add_new_address', (req,res)=>{
         state: req.query.state,
         landmark: req.query.landmark,
     };
-    if(new_address.landmark==null){
-        new_address.landmark = "";
+    if(edited_address.landmark==null){
+        edited_address.landmark = "";
     };
     var user_id = req.query.user_id;
     Address.create(new_address).then((address)=>{
