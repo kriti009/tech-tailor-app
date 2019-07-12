@@ -1,6 +1,7 @@
 var express = require("express");
 var Order = require("../models/order"),
     User = require("../models/user");
+var dateFormat = require('dateformat');
 var router = express.Router();
 
 router.get('/get_order_details', (req, res)=>{
@@ -22,8 +23,7 @@ router.post('/place_order', (req, res) => {
     var newOrder = {
         product : req.body.product,
         pickup_date : dateFormat(req.body.pickup_date, "isoDateTime"),
-        user_id : req.body.user_id,
-        // pickup_date: req.body.pickup_date,   
+        user_id : req.body.user_id, 
         pickup_address : req.body.pickup_address,
         price: req.body.price,
         status: 'order placed',
