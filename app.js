@@ -29,6 +29,8 @@ var seedAddress = require("./seedAddress");
 var seedTech = require("./seedTech");
 //requiring middleware
 var middleware = require("./middleware");
+//requiring Routes
+var productRoutes = require("./routes/product");
 
 // mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor
 var mongoDB = 'mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor';
@@ -44,33 +46,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(__dirname + "/public"));
 
-// var newAdmin = {
-//     username: "Admin123",
-//     password: "password",
-//     role: "admin" 
-// }
-// Admin.create(newAdmin, ()=>{
-//     console.log("new admin added");
-// })
-// console.log(imageDataURI.decode('data:image/png;base64,SOMEPNGDATAURI/wD/'));
-// var imageData = 'https://cdn.pixabay.com/photo/2016/03/09/16/50/city-street-1246870_960_720.jpg';
-// let dataBuffer = new Buffer(imageData);
-// let mediaType = 'PNG';
-// console.log(imageDataURI.encode(dataBuffer, mediaType));
-// // imageDataURI.encodeFromURL(imageData).then(res=> console.log(res));
-// console.log(imageDataURI.decode( imageDataURI.encode(dataBuffer, mediaType)));
-//seeding DB
-// seedDB();
-// seedOrder();
-// seedUser();
-// seedCategory();
-// seedAddress();
-// seedTech();
 
-// app.set("view engine", "ejs");
-// app.use(methodOverride("_method"));
-
-//OTP Config
 otplib.authenticator.options = {
     step: 2000
 };
@@ -79,6 +55,7 @@ otplib.authenticator.options = {
 // var otp_secret = otplib.authenticator.generateSecret();
 const otp_secret = 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD';
 
+app.use("/", productRoutes);
 app.get('/generate_otp/:no', (req,res)=>{
     var phone_no = req.params.no;
     const token = otplib.authenticator.generate(otp_secret);
@@ -186,55 +163,8 @@ app.put('/admin-login', (req, res) => {
     }).catch(()=>{})
 });
 
-app.get('/products',(req, res) => {
-    Product.find({}).then((data) => {
-        res.status(200).json(data);
-    })
-});
-app.get('/products/:id', (req, res) =>{
-    Product.findById(req.params.id).then((result)=>{
-        res.status(200).json(result)
-    })
-})
-app.put('/products', (req, res)=>{
-    var data = {
-        service_type : req.body.service_type,
-        gender : req.body.gender,
-        image_url: req.body.image_url,
-        short_description: req.body.short_description,
-        description: req.body.description,
-        alteration_price : req.body.alteration_price,
-    }
-    Product.findByIdAndUpdate(req.body._id, data).then((result)=>{
-        if(result != null){
-            res.status(200).json({success: true, message: "Product Updated"});
-        }
-    }).catch(()=>{
-        res.status(400).json({success: false, message: "Internal Error"});
-    })
-});
-app.post("/products", (req, res)=>{
-    var data = {
-        service_type : req.body.service_type,
-        gender : req.body.gender,
-        image_url: req.body.image_url,
-        short_description: req.body.short_description,
-        description: req.body.description,
-        alteration_price : req.body.alteration_price,
-    }
-    Product.create(data).then((result)=>{
-        res.status(200).json({success: true, message: "new product added", product_id: result._id});
-    }).catch(()=>{
-        res.status(400).json({success: false, message:"Internal error, could not add product"})
-    })
-})
-app.delete("/products", (req, res)=>{
-    Product.findByIdAndDelete(req.body._id).then(()=>{
-        res.status(200).json({success: true, message:"Product Deleted succesfully"});
-    }).catch(()=>{
-        res.status(400).json({success: false, message: "Internal error, Can't Delete this item"})
-    })
-});
+
+
 app.get('/get_user_details', (req, res) => {
     User.findById(req.query.user_id).populate("address").then((result)=>{
         if(result==null)
@@ -253,24 +183,7 @@ app.get("/get_category", (req, res)=> {
         res.json(category);
     })    
 });
-app.get("/product_by_category/:gender", (req,res) => {
-    
 
-    Category.findOne({"name" : req.params.gender}, (err,category) => {
-        if(err)
-            console.log(err)
-        else{
-            // res.json(category);
-            Product.find({"gender": category.name}, (err, products) => {
-                if(err)
-                    console.log(err);
-                else{
-                    res.json(products);
-                }
-            })
-        }
-    });
-});
 
 app.get('/cart', (req, res)=>{
     Cart.find({}).then((result)=>{
