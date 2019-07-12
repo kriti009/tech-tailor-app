@@ -59,6 +59,23 @@ router.put('/address', (req, res)=>{
         res.status(400).json({success: false, message: "internal error"})
     })
 });
+router.delete('/address',(req,res)=>{
+    var user_id = req.query.user_id,
+        address_id = req.query.address_id;
+    User.findById(user_id).then((result)=>{
+        if(result!=null){
+            for(var i = 0; i < result.address.length; i++){  
+                if (result.address[i] == address_id) {
+                  result.address.splice(i, 1);
+                  result.save(()=>{
+                    res.status(200).json(result);
+                  }) 
+                }
+             }
+            res.status(400).json(result);
+        }
+    })
+});
 router.post('/address', (req,res)=>{
     var new_address = {
         pincode : req.query.pincode,
