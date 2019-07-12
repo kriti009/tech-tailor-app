@@ -21,6 +21,7 @@ var Cart = require('./models/cart');
 var Technician = require("./models/technician");
 var Product = require('./models/product');
 var JwtDevice = require("./models/jwtDevice");
+//seed database
 var seedDB = require("./seedDb");
 var seedOrder = require("./seedOrder");
 var seedUser = require("./seedUser");
@@ -31,6 +32,7 @@ var seedTech = require("./seedTech");
 var middleware = require("./middleware");
 //requiring Routes
 var productRoutes = require("./routes/product");
+var orderRoutes = require("./routes/order");
 var categoryRoutes = require("./routes/category");
 var userRoutes = require("./routes/user");
 var cartRoutes = require("./routes/cart");
@@ -56,21 +58,25 @@ otplib.authenticator.options = {
 };
 
 
-// var otp_secret = otplib.authenticator.generateSecret();
-const otp_secret = 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD';
+
+// var otp_secret = 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLE';
 
 app.use("/", productRoutes);
-app.use("/", categoryRoutes);
+app.use("/category", categoryRoutes);
+app.use("/",orderRoutes);
 app.use("/user/", userRoutes);
 app.use("/cart",cartRoutes);
 app.use("/technician",technicianRoutes);
 
 app.get('/generate_otp/:no', (req,res)=>{
+    var otp_secret = otplib.authenticator.generateSecret();
     var phone_no = req.params.no;
     const token = otplib.authenticator.generate(otp_secret);
-    res.json({success: true, token: token});
+    res.json({success: true, token: token,otp_secret : otp_secret});
 });
-app.post('/signup/verify_otp', (req,res)=>{    
+
+app.post('/signup/verify_otp', (req,res)=>{  
+    var otp_secret = req.query.otp_secret;  
     var user_token = req.query.token;
     var device_id = req.query.device_id;
     var new_user = {
@@ -79,7 +85,6 @@ app.post('/signup/verify_otp', (req,res)=>{
         email: req.query.email,
         phone_no: req.query.phone_no,
         role: 'customer',
-        address: req.query.address,
     };
     if(otplib.authenticator.check(user_token, otp_secret)){
         // res.json({success: true, message: "OTP matched!"});
@@ -91,6 +96,7 @@ app.post('/signup/verify_otp', (req,res)=>{
         res.json({success: false, message: "authentication failed."});
 });
 app.post('/login/verify_otp', (req, res)=>{
+    var otp_secret = req.query.otp_secret;
     var user_token = req.query.token;
     var device_id = req.query.device_id;
     var phone_no = req.query.phone_no;
@@ -101,11 +107,6 @@ app.post('/login/verify_otp', (req, res)=>{
             if(err){
                 console.log(err);
             }else{
-                // console.log(user);
-                // user.jwtToken.forEach((t)=>{
-                //     if(jwtDecode(t).device_id == device_id)
-                //         res.json({success: true, message: "welcome back "+ jwtDecode(t).name});
-                // });
                 JwtDevice.findOne({device_id : device_id , user_id: user._id}).exec().then((result)=>{
                    if(result!=null){
                         res.json({success: true, message: "welcome back "+ user.name, user_id: user._id});
@@ -171,109 +172,6 @@ app.put('/admin-login', (req, res) => {
         }
     }).catch(()=>{})
 });
-
-
-
-
-app.get('/get_order_details', (req, res)=>{
-    Order.findById(req.query.order_id).populate('product.product_id').populate('pickup_address').then((order)=>{
-        if(order==null)
-            res.status(404).json({success: false, message: "No such order exits"});
-        var address = order.pickup_address.area.concat(", ",order.pickup_address.city, ", ",order.pickup_address.state,", ",order.pickup_address.pincode);
-        // var sentOrder = order;
-        // sentOrder.pickup_address= address;
-        // console.log(sentOrder);
-        // sentOrder.save(()=>{
-        //     console.log(sentOrder);
-            res.status(200).json(order);
-        // });
-        
-    }).catch()
-})
-app.get('/get_all_orders' , (req, res)=>{
-    Order.find({}).populate('user_id').populate("product.product_id").populate("pickup_address").then((result)=>{
-        res.status(200).json(result);    
-    });
-});
-app.post('/place_order', (req, res) => {
-    console.log(req.body.pickup_date);
-    console.log(dateFormat(req.body.pickup_date, "isoDateTime"));
-    var newOrder = {
-        product : req.body.product,
-        pickup_date : dateFormat(req.body.pickup_date, "isoDateTime"),
-        user_id : req.body.user_id,
-        // pickup_date: req.body.pickup_date,   
-        pickup_address : req.body.pickup_address,
-        price: req.body.price,
-        status: 'order placed',
-    };
-    var auditTemplate = {
-        status: 'order placed',
-        date : Date.now(),
-    }
-    User.findById(req.body.user_id).then((user)=>{
-        if(user==null)
-            res.status(404).json({success:false, message:"Wrong user credentials"});
-        else{
-            Order.create(newOrder, (err, order) => {
-                if(err){
-                    res.status(400).json({success: false, message: "couldn't place your order"})
-                }else{
-                    order.audit.push(auditTemplate);
-                    user.orders.push(order._id);
-                    order.save(()=>{
-                        user.save(()=>{
-                            res.status(201).json({success: true,message : "new order placed"});
-                            console.log("order placed and your order is : ", order._id);
-                        })
-                        
-                    });
-                    
-                }
-            });
-        }
-    }).catch()
-});
-app.put('/update_status', (req, res)=>{
-    var new_status = req.body.status;
-    // console.log(req);
-    // console.log(res);
-    var auditTemplate = {
-        status: new_status,
-        date : Date.now(),
-        updated_by: req.body.updated_by,
-    };
-    Order.findById(req.body.order_id).then((result) => {
-        result.status = new_status;
-        result.audit.push(auditTemplate);
-        result.save(()=>{
-            console.log("Status upadated");
-        });
-        res.status(202).json(result);
-    });
-});
-app.put('/assign_technician', (req, res)=>{
-    var auditTemplate = {
-        status: "technician assigned",
-        date : Date.now(),
-        updated_by: req.body.updated_by,
-        remark: `technician assigned: ${req.body.technician}`,
-    };
-    Order.findById(req.body.order_id).then((result)=>{
-        // console.log(req.body.technician);
-        result.technician = req.body.technician;
-        result.status = "technician assigned";
-        result.audit.push(auditTemplate);
-        result.save(()=>{
-            console.log("new technician assigned");
-            // console.log(result);
-        });
-        res.status(202).json(result);
-    });
-});
-
-
-
 
 function generateNewJWT (user , device_id){
     const payload = {

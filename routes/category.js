@@ -2,12 +2,12 @@ var express = require("express");
 var Category = require("../models/category");
 var router = express.Router();
 
-router.get("/category", (req, res)=> {
+router.get("/", (req, res)=> {
     Category.find({} , (err, category) => {    
         res.json(category);
     })    
 });
-router.post('/category', (req, res)=>{
+router.post('/', (req, res)=>{
     var new_category = {
         name : req.body.name,
         image_url : req.body.image_url,
