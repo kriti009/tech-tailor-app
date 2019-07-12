@@ -31,6 +31,7 @@ var seedTech = require("./seedTech");
 var middleware = require("./middleware");
 //requiring Routes
 var productRoutes = require("./routes/product");
+var categoryRoutes = require("./routes/category");
 
 // mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor
 var mongoDB = 'mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor';
@@ -56,6 +57,7 @@ otplib.authenticator.options = {
 const otp_secret = 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD';
 
 app.use("/", productRoutes);
+app.use("/", categoryRoutes);
 app.get('/generate_otp/:no', (req,res)=>{
     var phone_no = req.params.no;
     const token = otplib.authenticator.generate(otp_secret);
@@ -178,11 +180,8 @@ app.get('/get_user_details', (req, res) => {
         res.status(400).json({success: false, message: "Internal error"});
     })
 });
-app.get("/get_category", (req, res)=> {
-    Category.find({} , (err, category) => {    
-        res.json(category);
-    })    
-});
+
+
 
 
 app.get('/cart', (req, res)=>{
@@ -367,17 +366,7 @@ app.post('/add_new_address', (req,res)=>{
         res.status(400).json({success: falses, message: "internal error"});
     })
 });
-app.post('/add_new_category', (req, res)=>{
-    var new_category = {
-        name : req.body.name,
-        image_url : req.body.image_url,
-    };
-    Category.create(new_category).then(()=>{
-        res.status(200).json({success: true, message: "New Category saved"});
-    }).catch(()=>{
-        res.status(400).json({success: true, message: "Internal error"});
-    })
-});
+
 
 app.get('/technician',(req, res)=>{
     Technician.find({}).then((result)=>{
