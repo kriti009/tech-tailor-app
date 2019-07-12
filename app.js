@@ -32,6 +32,7 @@ var middleware = require("./middleware");
 //requiring Routes
 var productRoutes = require("./routes/product");
 var categoryRoutes = require("./routes/category");
+var userRoutes = require("./routes/user");
 
 // mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor
 var mongoDB = 'mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor';
@@ -58,6 +59,8 @@ const otp_secret = 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD';
 
 app.use("/", productRoutes);
 app.use("/", categoryRoutes);
+app.use("/user/", userRoutes);
+
 app.get('/generate_otp/:no', (req,res)=>{
     var phone_no = req.params.no;
     const token = otplib.authenticator.generate(otp_secret);
@@ -167,19 +170,6 @@ app.put('/admin-login', (req, res) => {
 
 
 
-app.get('/get_user_details', (req, res) => {
-    User.findById(req.query.user_id).populate("address").then((result)=>{
-        if(result==null)
-            res.status(400).json({success: false, message: "User not Found"});
-        var address = result.address.map((h,i)=>(
-            h.area.concat(", ",h.city, ", ",h.state,", ",h.pincode)
-        ));
-        // result.address.concat(' ', str2)
-        res.status(200).json({name: result.name, email: result.email, phone_no: result.phone_no, address :address});
-    }).catch(()=>{
-        res.status(400).json({success: false, message: "Internal error"});
-    })
-});
 
 
 
@@ -200,17 +190,7 @@ app.post('/add_to_cart', (req, res) => {
         res.status(409);
     })
 });
-app.get('/get_user_orders', (req,res)=>{
-    User.findById(req.query.user_id)
-    .populate({path: 'orders', populate: { path: 'pickup_address' }})
-    .then((user)=>{
-        if(user==null)
-            res.status(404).json({success: false, message: "No such user/orders exits"});
-        res.status(200).json(user.orders);
-    }).catch(()=>{
-        res.status(400).json({success: false, message: "Internal error"});
-    })
-});
+
 app.get('/get_order_details', (req, res)=>{
     Order.findById(req.query.order_id).populate('product.product_id').populate('pickup_address').then((order)=>{
         if(order==null)
@@ -307,65 +287,7 @@ app.put('/assign_technician', (req, res)=>{
         res.status(202).json(result);
     });
 });
-app.get('/get_address',(req, res)=>{
-    var user_id = req.query.user_id;
-    User.findById(user_id).populate("address").then((result)=>{
-        if(result==null){
-            res.status(404).json({success:false, message:"NO such user or address exits"})
-        }else{
-            res.status(200).json({success:true, address: result.address})
-        }
-    })
-});
-app.put('/edit_address', (req, res)=>{
-    var edited_address = {
-        pincode : req.query.pincode,
-        area : req.query.area,
-        city: req.query.city,
-        state: req.query.state,
-        landmark: req.query.landmark,
-    };
-    if(edited_address.landmark==null){
-        edited_address.landmark = "";
-    };
-    var address_id = req.query.address_id;
-    // var user_id = req.query.user_id;
-    Address.findByIdAndUpdate(address_id, edited_address).then((result)=>{
-        if(result==null)
-            res.status(400).json({success: false, message: "error"});
-        else
-            res.status(200).json({success: true, message:"saved changes"});
-    }).catch(()=>{
-        res.status(400).json({success: false, message: "internal error"})
-    })
-});
-app.post('/add_new_address', (req,res)=>{
-    var new_address = {
-        pincode : req.query.pincode,
-        area : req.query.area,
-        city: req.query.city,
-        state: req.query.state,
-        landmark: req.query.landmark,
-    };
-    if(new_address.landmark==null){
-        new_address.landmark = "";
-    };
-    var user_id = req.query.user_id;
-    Address.create(new_address).then((address)=>{
-        User.findById(user_id).then((user)=>{
-            if(user==null)
-                res.status(400).json({success: false, message: "internal error"});
-            else{
-                user.address.push(address._id);
-                user.save(()=>{
-                    res.status(200).json({success: true, message: "new address added" ,address_id: address._id});
-                });
-            }
-        })
-    }).catch(()=>{
-        res.status(400).json({success: falses, message: "internal error"});
-    })
-});
+
 
 
 app.get('/technician',(req, res)=>{
