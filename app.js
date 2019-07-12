@@ -33,6 +33,8 @@ var middleware = require("./middleware");
 var productRoutes = require("./routes/product");
 var categoryRoutes = require("./routes/category");
 var userRoutes = require("./routes/user");
+var cartRoutes = require("./routes/cart");
+var technicianRoutes = require("./routes/technician");
 
 // mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor
 var mongoDB = 'mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor';
@@ -60,6 +62,8 @@ const otp_secret = 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD';
 app.use("/", productRoutes);
 app.use("/", categoryRoutes);
 app.use("/user/", userRoutes);
+app.use("/cart",cartRoutes);
+app.use("/technician",technicianRoutes);
 
 app.get('/generate_otp/:no', (req,res)=>{
     var phone_no = req.params.no;
@@ -171,26 +175,6 @@ app.put('/admin-login', (req, res) => {
 
 
 
-
-
-
-app.get('/cart', (req, res)=>{
-    Cart.find({}).then((result)=>{
-        res.status(200).json(result)
-    });
-});
-app.post('/add_to_cart', (req, res) => {
-    var new_item = {
-        product_id : req.query.product_id,
-        user_id : req.query.user_id
-    };
-    Cart.create(new_item).then(()=>{
-        res.status(201).send({'message' : 'new item added to cart'})
-    }).catch(()=>{
-        res.status(409);
-    })
-});
-
 app.get('/get_order_details', (req, res)=>{
     Order.findById(req.query.order_id).populate('product.product_id').populate('pickup_address').then((order)=>{
         if(order==null)
@@ -290,50 +274,6 @@ app.put('/assign_technician', (req, res)=>{
 
 
 
-app.get('/technician',(req, res)=>{
-    Technician.find({}).then((result)=>{
-        res.status('200').json(result);
-    }).catch(()=>{
-        res.status('400').json({success:false, message: "internal Error"});
-    })
-})
-app.delete('/technician', (req, res)=>{
-    Technician.findByIdAndDelete(req.body._id).then(()=>{
-        res.status(200).json({success: true, message:"Technician Removed succesfully"});
-    }).catch(()=>{
-        res.status(400).json({success: false, message: "Internal error, Can't Delete this item"})
-    })
-})
-app.post('/technician', (req, res)=>{
-    var data = {
-        name: req.body.name,
-        address: req.body.address,
-        phone_no : req.body.phone_no
-    }
-    if(req.body.email!=null || req.body.email!=undefined)
-        data.email =  req.body.email;
-    Technician.create(data).then((result)=>{
-        res.status(200).json({success: true, message: "new Added", technician_id: result._id});
-    }).catch(()=>{
-        res.status(400).json({success: false, message:"Internal error, could not add"})
-    })
-})
-app.put('/technician', (req, res)=>{
-    var data = {
-        name: req.body.name,
-        address: req.body.address,
-        phone_no : req.body.phone_no
-    }
-    if(req.body.email!=null || req.body.email!=undefined)
-        data.email =  req.body.email;
-    Technician.findByIdAndUpdate(req.body._id, data).then((result)=>{
-        if(result != null){
-            res.status(200).json({success: true, message: " Updated"});
-        }
-    }).catch(()=>{
-        res.status(400).json({success: false, message: "Internal Error"});
-    })
-})
 
 function generateNewJWT (user , device_id){
     const payload = {
