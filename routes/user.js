@@ -62,17 +62,22 @@ router.put('/address', (req, res)=>{
 router.delete('/address',(req,res)=>{
     var user_id = req.query.user_id,
         address_id = req.query.address_id;
+    var counter= 0;
     User.findById(user_id).then((result)=>{
-        if(result!=null){
+        if(result!=null && result.address!=null){
             for(var i = 0; i < result.address.length; i++){  
                 if (result.address[i] == address_id) {
                   result.address.splice(i, 1);
                   result.save(()=>{
+                      counter++;
                     res.status(200).json({success: true, message: "Address deleted"});
                   }) 
                 }
              }
-            res.status(400).json({success: false, message: "unable to Delete"});
+            //  if(counter==0)
+            //     res.status(400).json({success: false, message: "unable to Delete"});
+        }else{
+            res.status(404).json({success: false, message: "could not delete "})
         }
     })
 });
