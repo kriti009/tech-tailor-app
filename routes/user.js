@@ -68,11 +68,11 @@ router.delete('/address',(req,res)=>{
                 if (result.address[i] == address_id) {
                   result.address.splice(i, 1);
                   result.save(()=>{
-                    res.status(200).json({succes: true, message: "Address deleted"});
+                    res.status(200).json({success: true, message: "Address deleted"});
                   }) 
                 }
              }
-            res.status(400).json({succes: false, message: "unable to Delete"});
+            res.status(400).json({success: false, message: "unable to Delete"});
         }
     })
 });
