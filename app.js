@@ -9,6 +9,7 @@ var express = require('express'),
     cors = require('cors'),
     dateFormat = require('dateformat'),
     imageDataURI = require('image-data-uri');
+var autoIncrement = require('mongoose-auto-increment');
     
 var config = require('./config');
 //requiring models
@@ -18,6 +19,7 @@ var Order = require("./models/order");
 var Address = require("./models/address");
 var Category = require("./models/category");
 var Cart = require('./models/cart');
+var OrderCounter = require("./models/orderCounter");
 var Technician = require("./models/technician");
 var Product = require('./models/product');
 var JwtDevice = require("./models/jwtDevice");
@@ -40,7 +42,9 @@ var technicianRoutes = require("./routes/technician");
 
 // mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor
 var mongoDB = 'mongodb://kriti09:rachana123@ds233167.mlab.com:33167/tech-tailor';
+
 // mongoose.connect("mongodb://localhost:27017/tech-tailor",{ useNewUrlParser: true});
+// var connection = mongoose.createConnection("mongodb://localhost/myDatabase");
 mongoose.connect(mongoDB);
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
@@ -57,7 +61,11 @@ otplib.authenticator.options = {
     step: 2000
 };
 
-
+// var newcounter = {
+//     _id : "order_id",
+//     seq_val : 0,
+// };
+// OrderCounter.create(newcounter).then(()=>{console.log("done")});
 
 // var otp_secret = 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLE';
 

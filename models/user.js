@@ -12,7 +12,7 @@ var userSchema = new mongoose.Schema({
     ],
     orders: [
         {
-            type : mongoose.Schema.Types.ObjectId,
+            type : Number,
             ref: "Order"
         }
     ],

@@ -1,7 +1,9 @@
 var mongoose = require("mongoose");
+var autoIncrement = require('mongoose-auto-increment');
 
 var Schema = mongoose.Schema;
 var orderSchema = new mongoose.Schema({
+    _id : {type: Number},
     product : [{   
         quantity: {type: Number},
         product_id : {
