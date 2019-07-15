@@ -34,7 +34,10 @@ router.post('/place_order', (req, res) => {
     var response = placeOrder(newOrder, req.body.user_id);
     if(response.success){
         res.status(200).json(response);    
-    }else{
+    }else if(response.status == 400){
+        res.status(200).json(response);
+    }   
+    else{
         res.status(400).json(response);
     }
 });
@@ -122,7 +125,7 @@ function getNextSequence(name,data) {
         // resolve(result.seq_val);
         OrderCounter.findOneAndUpdate({"_id" : name},{$inc: {seq_val :1} },(err, result)=>{
             if(!err){
-                console.log(result);
+                // console.log(result);
                 resolve(result.seq_val);
                     
             }
