@@ -6,6 +6,8 @@ var technicianSchema = new mongoose.Schema({
     phone_no : {type: String},
     email: {type: String},
     address: {type: String},
+    id_number: {type: String},
+    id_photo : {type:String},
 });
 
 module.exports = mongoose.model("Technician", technicianSchema);

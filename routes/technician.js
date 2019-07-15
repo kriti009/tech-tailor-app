@@ -20,7 +20,9 @@ router.post('/', (req, res)=>{
     var data = {
         name: req.body.name,
         address: req.body.address,
-        phone_no : req.body.phone_no
+        phone_no : req.body.phone_no,
+        id_number : req.body.id_number,
+        id_photo: req.body.id_photo,
     }
     if(req.body.email!=null || req.body.email!=undefined)
         data.email =  req.body.email;
@@ -34,7 +36,9 @@ router.put('/', (req, res)=>{
     var data = {
         name: req.body.name,
         address: req.body.address,
-        phone_no : req.body.phone_no
+        phone_no : req.body.phone_no,
+        id_number : req.body.id_number,
+        id_photo: req.body.id_photo
     }
     if(req.body.email!=null || req.body.email!=undefined)
         data.email =  req.body.email;

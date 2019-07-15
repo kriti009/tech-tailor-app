@@ -35,7 +35,7 @@ router.post('/place_order', (req, res) => {
     if(response.success){
         res.status(200).json(response);    
     }else{
-        res.status(400).json(response);
+        res.status(200).json(response);
     }
 });
 router.put('/update_status', (req, res)=>{

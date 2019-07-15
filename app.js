@@ -8,7 +8,8 @@ var express = require('express'),
     jwtDecode = require('jwt-decode'),
     cors = require('cors'),
     dateFormat = require('dateformat'),
-    imageDataURI = require('image-data-uri');
+    imageDataURI = require('image-data-uri'),
+    cloudinary = require('cloudinary').v2;
 var autoIncrement = require('mongoose-auto-increment');
     
 var config = require('./config');
@@ -49,6 +50,7 @@ mongoose.connect(mongoDB);
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
 
 app.use(cors());
 app.set('superSecret', config.secret);
