@@ -31,11 +31,15 @@ router.post('/place_order', (req, res) => {
         status: 'order placed',
     };
     // console.log("yo this is the if "+newOrder._id);
+    var c1 = Order.countDocuments();
     var response = placeOrder(newOrder, req.body.user_id);
-    if(response.success){
+    var c2 = Order.countDocuments();
+    if(c1!=c2)
+        res.status(200).json(response);
+    else if(response.success){
         res.status(200).json(response);    
     }else{
-        res.status(200).json(response);
+        res.status(400).json(response);
     }
 });
 router.put('/update_status', (req, res)=>{
