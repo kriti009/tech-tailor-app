@@ -10,7 +10,7 @@
     "cors": "^2.8.5",
     "dateformat": "^3.0.3",
     "ejs": "^2.6.1",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "image-data-uri": "^2.0.0",
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^2.2.0",
